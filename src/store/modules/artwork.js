@@ -60,6 +60,17 @@ const mutations = {
     artwork.isLoading = false;
     artwork.error = error;
   },
+  FETCH_ARTWORK_PDF_LOADING: ({artwork}) => {
+    artwork.isLoading = true;
+    artwork.error = null;
+  },
+  FETCH_ARTWORK_PDF_SUCCESS: ({artwork}) => {
+    artwork.isLoading = false;
+  },
+  FETCH_ARTWORK_PDF_ERROR: ({artwork}, error) => {
+    artwork.isLoading = false;
+    artwork.error = error;
+  },
 };
 
 const actions = {
@@ -134,11 +145,29 @@ const actions = {
     fetch(`${baseUrl}/${sliceUrl}/${artworkId}`, options)
     .then((response) => response.json())
     .then(() => {
-      dispatch('fetchArtworkList', { page: state.artwork.page.current_page, perPage: state.artwork.page.per_page});
+      dispatch('fetchArtworkList', { page: state.artwork.page.current_page, perPage: state.artwork.page.per_page });
       commit('DELETE_ARTWORK_SUCCESS');
     })
     .catch((error) => commit('DELETE_ARTWORK_ERROR', error));
-  }
+  },
+  getPdf: ({commit}, artworkId) => {
+    const options = {
+      method: 'GET',
+    };
+
+    commit('FETCH_ARTWORK_PDF_LOADING');
+
+    fetch(`${baseUrl}/${sliceUrl}/${artworkId}/pdf`, options)
+    .then((response) => response.blob())
+    .then((blob) => {
+      const a = document.createElement("a");
+      a.href = window.URL.createObjectURL(blob);
+      a.download = 'FILENAME';
+      a.click();
+      commit('FETCH_ARTWORK_PDF_SUCCESS');
+    })
+    .catch((error) => commit('FETCH_ARTWORK_PDF_ERROR', error));
+  },
 };
 
 const getters = {

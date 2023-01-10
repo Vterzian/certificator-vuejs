@@ -14,6 +14,7 @@
         openModal: 'openModal',
         fetchArtworkList: 'fetchArtworkList',
         deleteArtwork: 'deleteArtwork',
+        getPdf: 'getPdf',
       }),
     },
     computed: {
@@ -51,7 +52,7 @@
         </v-btn>
       </v-col>
     </v-row>
-    <v-table hover>
+    <v-table hover fixed-header height="calc(100vh - 275px)" class="mt-4">
       <thead>
         <tr>
           <th class="w-0">Image</th>
@@ -70,7 +71,10 @@
         <v-overlay v-model="artworkIsLoading" contained scrim="#CCCCCC" class="align-center justify-center rounded">
           <v-progress-circular indeterminate></v-progress-circular>
         </v-overlay>
-        <tr v-for="artwork in artworkList" :key="artwork.id">
+        <div v-if="!artworkList?.length && !artworkIsLoading" class="w-100 position-absolute text-center pa-8">
+          No artwork found
+        </div>
+        <tr v-for="artwork in artworkList" :key="artwork.id" @click="openModal({ componentName: 'ArtworkDetail', props: { artwork }})">
           <td>
             <v-img cover width="75" aspect-ratio="1" :src="artwork.image" class="my-2"/>
           </td>
@@ -78,14 +82,14 @@
           <td>{{ artwork.name }}</td>
           <td>{{ artwork.width }}x{{ artwork.height }}</td>
           <td class="text-end">
-            <v-btn variant="plain" icon="mdi-eye" elevation="0" size="small" @click="openModal({ componentName: 'ArtworkDetail', props: { artwork }})"/>
-            <v-btn variant="plain" icon="mdi-pencil" elevation="0" size="small" @click="openModal({ componentName: 'UpdateArtwork', props: { artwork } })"/>
+            <v-btn variant="plain" icon="mdi-download" elevation="0" size="small" @click.stop="getPdf(artwork.id)"/>
+            <v-btn variant="plain" icon="mdi-pencil" elevation="0" size="small" @click.stop="openModal({ componentName: 'UpdateArtwork', props: { artwork } })"/>
             <v-btn 
               variant="plain" 
               icon="mdi-delete" 
               elevation="0" 
               size="small" 
-              @click="openModal({ componentName: 'Confirm', props: { callback: () => deleteArtwork(artwork.id), message: `Confirm delete ${artwork.name} ?` }})"
+              @click.stop="openModal({ componentName: 'Confirm', props: { callback: () => deleteArtwork(artwork.id), message: `Confirm delete ${artwork.name} ?` }})"
             />
           </td>
         </tr>
@@ -94,6 +98,7 @@
     <v-pagination
       v-model="currentPage"
       density="compact"
+      v-if="artworkListLastPage > 1"
       :length="artworkListLastPage"
       :total-visible="7"
       class="mt-4"
