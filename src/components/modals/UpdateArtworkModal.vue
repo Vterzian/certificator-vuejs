@@ -1,18 +1,21 @@
 <script setup>
-  import { computed, reactive } from 'vue';
-  import { useStore } from 'vuex';
+  import { computed, reactive } from 'vue'
+  import { useStore } from 'vuex'
   import { useVuelidate } from '@vuelidate/core'
   import { required, numeric } from '@vuelidate/validators'
 
-  const { dispatch } = useStore();
+  const { dispatch, getters } = useStore();
+
+  const closeModal = () => dispatch('closeModal');
+  const modalProps = computed(() => getters.modalProps);
+
   const formData = reactive({
-    name: '',
-    width: '',
-    height: '',
-    signature: '',
-    technique: '',
-    dateCreation: '',
-    image: null,
+    name: getters.modalProps.artwork.name,
+    height:  modalProps.value.artwork.height,
+    width: modalProps.value.artwork.width,
+    signature: modalProps.value.artwork.signature,
+    technique: modalProps.value.artwork.technique,
+    dateCreation: modalProps.value.artwork.date_creation,
   });
 
   const rules = computed(() => ({
@@ -22,36 +25,27 @@
     signature: { required },
     technique: { required },
     dateCreation: { required },
-    image: { required },
   }));
 
   const v$ = useVuelidate(rules, formData);
 
-  const closeModal = () => dispatch('closeModal');
-
-  const handleAddArtwork = async () => {
+  const handleUpdateArtwork = () => {
     v$.value.$touch();
     if (v$.value.$invalid) {
       return ;
     }
 
-    dispatch('addArtwork', formData);
+    dispatch('updateArtwork', { id: modalProps.value.artwork.id, ...formData});
     closeModal();
   };
 
-  const handleFileInputChange = (event) => {
-    formData.image = null;
-    v$.value.image.$touch();
-    formData.image = event.target.files[0];
-  };
 </script>
 
 <template>
   <v-container>
     <v-row>
       <v-col>
-        {{ image }}
-        <h3>Add new artwork</h3>
+        <h3>Update Artwork {{ modalProps.artwork.name }}</h3>
       </v-col>
     </v-row>
     <v-row>
@@ -66,7 +60,6 @@
           :error-messages="v$.name.$error && v$.name.$errors.at(0).$message"
           @blur="v$.name.$touch"
         />
-        <!-- <div v-if="v$.name.$error" class="">{{ v$.name.$errors[0].$message }}</div> -->
       </v-col>
     </v-row>
     <v-row>
@@ -136,21 +129,6 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col>
-        <v-file-input 
-          label="Image" 
-          variant="solo" 
-          density="compact" 
-          hide-details="auto" 
-          clearable
-          @change="handleFileInputChange"
-          @click:clear="handleFileInputChange"
-          @click="v$.image.$touch"
-          :error-messages="v$.image.$error && v$.image.$errors.at(0).$message"
-        />
-      </v-col>
-    </v-row>
-    <v-row>
       <v-col class="d-flex justify-end">
         <v-btn 
           class="me-4"
@@ -159,9 +137,9 @@
         >
           Close
         </v-btn>
-        <v-btn 
+        <v-btn
           color="success"
-          @click.prevent="handleAddArtwork"
+          @click.prevent="handleUpdateArtwork"
         >
           Save
         </v-btn>
