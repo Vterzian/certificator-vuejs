@@ -1,6 +1,6 @@
 <script setup>
-  import { computed, reactive } from 'vue';
-  import { useStore } from 'vuex';
+  import { computed, reactive } from 'vue'
+  import { useStore } from 'vuex'
   import { useVuelidate } from '@vuelidate/core'
   import { required, numeric } from '@vuelidate/validators'
 

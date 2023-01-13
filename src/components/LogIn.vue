@@ -1,7 +1,30 @@
-<script>
-  export default {
-    name: 'LogIn',
-  }
+<script setup>
+  import { computed, reactive } from 'vue'
+  import { useStore } from 'vuex'
+  import { useVuelidate } from '@vuelidate/core'
+  import { required } from '@vuelidate/validators'
+
+  const { dispatch } = useStore();
+
+  const formData = reactive({
+    email: '',
+    password: '',
+  });
+  const rules = computed(() => ({
+    email: { required },
+    password: { required },
+  }));
+
+  const v$ = useVuelidate(rules, formData);
+
+  const handleLogin = () => {
+    v$.value.$touch();
+    if (v$.value.$invalid) {
+      return ;
+    }
+
+    dispatch('login', {...formData});
+  };
 </script>
 
 <template>
@@ -16,17 +39,25 @@
           <v-form>
             <v-text-field
               variant="solo"
-              label="Login"
+              label="Email"
+              clearable
+              v-model="formData.email"
+              :error-messages="v$.email.$error && v$.email.$errors.at(0).$message"
+              @blur="v$.email.$touch"
             ></v-text-field>
             <v-text-field
               variant="solo"
               label="Password"
+              clearable
+              v-model="formData.password"
+              :error-messages="v$.password.$error && v$.password.$errors.at(0).$message"
+              @blur="v$.password.$touch"
             ></v-text-field>
           </v-form>
           <v-btn
             color="primary"
             class="mr-4 w-100"
-            @click="this.$router.push({ name: 'home' })"
+            @click="handleLogin"
           >
             Log in
           </v-btn>

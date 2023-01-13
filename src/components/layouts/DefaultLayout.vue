@@ -1,16 +1,14 @@
-<script>
-  import { useRoute } from 'vue-router'
+<script setup>
   import { computed } from 'vue'
+  import { useStore } from 'vuex'
+  import { useRoute } from 'vue-router'
 
-  export default {
-    name: 'DefaultLayout',
-    setup() {
-      const router = useRoute();
-      const routeName = computed(() => router.name);
+  const router = useRoute();
+  const { dispatch } = useStore();
+  const routeName = computed(() => router.name);
 
-      return { routeName };
-    },
-  }
+  const logout = () => dispatch('logout');
+
 </script>
 
 <template>
@@ -52,7 +50,7 @@
             prepend-icon="mdi-power" 
             title="LOG OUT" 
             value="log out"
-            @click.prevent="$router.push({ name: 'logIn' })"
+            @click.prevent="logout"
           ></v-list-item>
         </v-list>
       </div>

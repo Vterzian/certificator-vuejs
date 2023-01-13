@@ -5,6 +5,9 @@ const routes = [
     name: 'logIn',
     path: '',
     component: () => import('@/components/LogIn.vue'),
+    meta: {
+      allowAnonymous: true,
+    }
   },
   {
     name: 'DefaultLayout',

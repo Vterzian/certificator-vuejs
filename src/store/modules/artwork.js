@@ -1,4 +1,4 @@
-const baseUrl = 'http://localhost:8000';
+const baseUrl = process.env.VUE_APP_API_BASE_URL;
 const sliceUrl = 'artworks';
 
 const state = {
